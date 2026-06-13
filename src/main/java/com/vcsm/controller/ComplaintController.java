@@ -2,8 +2,11 @@ package com.vcsm.controller;
 
 import com.vcsm.model.Complaint;
 import com.vcsm.service.ComplaintService;
+
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -40,6 +43,20 @@ public class ComplaintController {
         return ResponseEntity.ok(complaintService.getComplaintsByStatus(
                 Complaint.ComplaintStatus.valueOf(status.toUpperCase())));
     }
+
+    // Add this method to ComplaintController
+@ExceptionHandler(IllegalStateException.class)
+public ResponseEntity<ErrorResponse> handleIllegalState(IllegalStateException ex, HttpServletRequest request) {
+    ErrorResponse error = new ErrorResponse(
+        HttpStatus.BAD_REQUEST.value(),
+        "Operation Failed",
+        ex.getMessage(),
+        ex.getMessage(),
+        request.getRequestURI()
+    );
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+}    
+
 
     @PutMapping("/{id}/status")
     public ResponseEntity<Complaint> updateStatus(
