@@ -1,3 +1,5 @@
+/* Import responsive styles */
+@import url('responsive.css');
 :root {
     --purple: #6f42c1;
     --purple-light: #8b5cf6;
@@ -95,3 +97,5 @@ body {
     70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
     100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
 }
+/* Mobile Responsive Styles */
+@import url('responsive.css');

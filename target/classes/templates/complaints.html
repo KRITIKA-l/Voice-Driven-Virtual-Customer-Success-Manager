@@ -2,13 +2,14 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Complaints - VCSM</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="/css/style.css" rel="stylesheet">
     <link href="/css/ui.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/spinners.css">
+    <link rel="stylesheet" href="/css/responsive.css">
 </head>
 <body>
 
@@ -17,64 +18,74 @@
     <div class="spinner"></div>
 </div>
 
+<!-- Navbar with mobile toggler -->
 <nav class="navbar navbar-expand-lg navbar-dark app-nav">
     <div class="container">
         <a class="navbar-brand fw-bold" href="/"><i class="fas fa-robot me-2"></i>Virtual Customer Success Manager</a>
-        <div class="navbar-nav ms-auto">
-            <a class="nav-link" href="/">Dashboard</a>
-            <a class="nav-link active" href="/complaints">Complaints</a>
-            <a class="nav-link" href="/events">Events</a>
-            <a class="nav-link" href="/analytics">Analytics</a>
+        
+        <!-- Mobile Toggler Button -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain" aria-controls="navMain" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <!-- Collapsible Navbar Links -->
+        <div class="collapse navbar-collapse" id="navMain">
+            <div class="navbar-nav ms-auto text-center">
+                <a class="nav-link" href="/">Dashboard</a>
+                <a class="nav-link active" href="/complaints">Complaints</a>
+                <a class="nav-link" href="/events">Events</a>
+                <a class="nav-link" href="/analytics">Analytics</a>
+            </div>
         </div>
     </div>
 </nav>
 
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="fw-bold"><i class="fas fa-exclamation-circle text-purple me-2"></i>Complaint Management</h4>
-        <button class="btn btn-purple" data-bs-toggle="modal" data-bs-target="#fileComplaintModal">
+    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
+        <h4 class="fw-bold mb-0"><i class="fas fa-exclamation-circle text-purple me-2"></i>Complaint Management</h4>
+        <button class="btn btn-purple w-100 w-sm-auto" data-bs-toggle="modal" data-bs-target="#fileComplaintModal">
             <span class="btn-spinner"></span>
             <span class="btn-text"><i class="fas fa-plus me-1"></i>New Complaint</span>
         </button>
     </div>
 
-    <!-- Stats Row -->
+    <!-- Stats Row - 2 columns on mobile, 4 on desktop -->
     <div class="row g-2 mb-4">
-        <div class="col">
-            <div class="card text-center border-danger">
+        <div class="col-6 col-md-3">
+            <div class="card text-center border-danger h-100">
                 <div class="card-body py-2">
                     <h5 class="text-danger mb-0" th:text="${stats.open}">0</h5>
-                    <small>Open</small>
+                    <small class="text-muted">Open</small>
                 </div>
             </div>
         </div>
-        <div class="col">
-            <div class="card text-center border-warning">
+        <div class="col-6 col-md-3">
+            <div class="card text-center border-warning h-100">
                 <div class="card-body py-2">
                     <h5 class="text-warning mb-0" th:text="${stats.inProgress}">0</h5>
-                    <small>In Progress</small>
+                    <small class="text-muted">In Progress</small>
                 </div>
             </div>
         </div>
-        <div class="col">
-            <div class="card text-center border-success">
+        <div class="col-6 col-md-3">
+            <div class="card text-center border-success h-100">
                 <div class="card-body py-2">
                     <h5 class="text-success mb-0" th:text="${stats.resolved}">0</h5>
-                    <small>Resolved</small>
+                    <small class="text-muted">Resolved</small>
                 </div>
             </div>
         </div>
-        <div class="col">
-            <div class="card text-center border-secondary">
+        <div class="col-6 col-md-3">
+            <div class="card text-center border-secondary h-100">
                 <div class="card-body py-2">
                     <h5 class="mb-0" th:text="${stats.total}">0</h5>
-                    <small>Total</small>
+                    <small class="text-muted">Total</small>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Complaints Table -->
+    <!-- Complaints Table with horizontal scroll on mobile -->
     <div class="card shadow-sm">
         <div class="table-responsive">
             <table class="table table-hover mb-0">
@@ -109,7 +120,7 @@
                         </td>
                         <td th:text="${#temporals.format(c.createdAt, 'dd MMM yyyy')}">Date</td>
                         <td>
-                            <button class="btn btn-xs btn-outline-secondary" onclick="updateComplaintStatus(this, ${c.id})">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="updateComplaintStatus(this, ${c.id})">
                                 <span class="btn-spinner"></span>
                                 <span class="btn-text">Update</span>
                             </button>
@@ -121,9 +132,9 @@
     </div>
 </div>
 
-<!-- File Complaint Modal -->
+<!-- File Complaint Modal - Responsive on mobile -->
 <div class="modal fade" id="fileComplaintModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title"><i class="fas fa-plus-circle text-purple me-2"></i>File New Complaint</h5>
@@ -160,12 +171,12 @@
                     <textarea id="m_desc" class="form-control" rows="3" placeholder="Describe the issue in detail"></textarea>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <div class="modal-footer flex-column flex-sm-row">
+                <button type="button" class="btn btn-secondary w-100 w-sm-auto" data-bs-dismiss="modal">
                     <span class="btn-spinner"></span>
                     <span class="btn-text">Cancel</span>
                 </button>
-                <button type="button" class="btn btn-purple" onclick="submitComplaint()">
+                <button type="button" class="btn btn-purple w-100 w-sm-auto" onclick="submitComplaint()">
                     <span class="btn-spinner"></span>
                     <span class="btn-text">Submit Complaint</span>
                 </button>
@@ -190,7 +201,7 @@
 
     // Modified submitComplaint with spinner
     function submitComplaint() {
-        const btn = event.target;
+        const btn = event.target.closest('button');
         if (btn && btn.classList) {
             btn.classList.add('loading');
         }

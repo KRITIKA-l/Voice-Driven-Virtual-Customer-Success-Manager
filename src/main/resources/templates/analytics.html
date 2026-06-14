@@ -2,12 +2,14 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Analytics - VCSM</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="/css/style.css" rel="stylesheet">
     <link href="/css/ui.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/spinners.css">
+    <link rel="stylesheet" href="/css/responsive.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -17,14 +19,24 @@
     <div class="spinner"></div>
 </div>
 
+<!-- Navbar with mobile toggler -->
 <nav class="navbar navbar-expand-lg navbar-dark app-nav">
     <div class="container">
         <a class="navbar-brand fw-bold" href="/"><i class="fas fa-robot me-2"></i>Virtual Customer Success Manager</a>
-        <div class="navbar-nav ms-auto">
-            <a class="nav-link" href="/">Dashboard</a>
-            <a class="nav-link" href="/complaints">Complaints</a>
-            <a class="nav-link" href="/events">Events</a>
-            <a class="nav-link active" href="/analytics">Analytics</a>
+        
+        <!-- Mobile Toggler Button -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain" aria-controls="navMain" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <!-- Collapsible Navbar Links -->
+        <div class="collapse navbar-collapse" id="navMain">
+            <div class="navbar-nav ms-auto text-center">
+                <a class="nav-link" href="/">Dashboard</a>
+                <a class="nav-link" href="/complaints">Complaints</a>
+                <a class="nav-link" href="/events">Events</a>
+                <a class="nav-link active" href="/analytics">Analytics</a>
+            </div>
         </div>
     </div>
 </nav>
@@ -32,45 +44,45 @@
 <div class="container mt-4">
     <h4 class="fw-bold mb-4"><i class="fas fa-chart-bar text-purple me-2"></i>Community Analytics</h4>
 
-    <!-- Stats Cards -->
+    <!-- Stats Cards - Responsive grid -->
     <div class="row g-3 mb-4">
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
             <div class="card text-center shadow-sm border-0">
                 <div class="card-body">
                     <h2 class="fw-bold text-purple" th:text="${complaintStats.total}">0</h2>
-                    <p class="text-muted mb-0">Total Complaints</p>
+                    <p class="text-muted mb-0 small">Total Complaints</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
             <div class="card text-center shadow-sm border-0">
                 <div class="card-body">
                     <h2 class="fw-bold text-success" th:text="${complaintStats.resolved}">0</h2>
-                    <p class="text-muted mb-0">Resolved</p>
+                    <p class="text-muted mb-0 small">Resolved</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
             <div class="card text-center shadow-sm border-0">
                 <div class="card-body">
                     <h2 class="fw-bold text-info" th:text="${totalEvents}">0</h2>
-                    <p class="text-muted mb-0">Total Events</p>
+                    <p class="text-muted mb-0 small">Total Events</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
             <div class="card text-center shadow-sm border-0">
                 <div class="card-body">
                     <h2 class="fw-bold text-warning" th:text="${activeEvents}">0</h2>
-                    <p class="text-muted mb-0">Active Events</p>
+                    <p class="text-muted mb-0 small">Active Events</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Charts Row with Skeleton Loading -->
+    <!-- Charts Row - Stacks on mobile -->
     <div class="row g-3">
-        <div class="col-md-6">
+        <div class="col-12 col-md-6">
             <div class="card shadow-sm">
                 <div class="card-header bg-white fw-bold">Complaints by Status</div>
                 <div class="card-body" id="statusChartContainer">
@@ -78,7 +90,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-12 col-md-6">
             <div class="card shadow-sm">
                 <div class="card-header bg-white fw-bold">Complaints by Category</div>
                 <div class="card-body" id="categoryChartContainer">
@@ -131,6 +143,16 @@
                 data: [stats.open, stats.inProgress, stats.resolved, stats.closed],
                 backgroundColor: ['#dc3545', '#ffc107', '#28a745', '#6c757d']
             }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { font: { size: 12 } }
+                }
+            }
         }
     });
 
@@ -153,7 +175,14 @@
                         backgroundColor: '#8b5cf6'
                     }]
                 },
-                options: { plugins: { legend: { display: false } } }
+                options: { 
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { font: { size: 10 }, rotation: 45 } }
+                    }
+                }
             });
             
             // Hide spinner after charts load

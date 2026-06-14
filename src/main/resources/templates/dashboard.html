@@ -2,27 +2,42 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>VCSM - Virtual Customer Success Manager</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="/css/style.css" rel="stylesheet">
     <link href="/css/ui.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/spinners.css">
+    <link rel="stylesheet" href="/css/responsive.css">
 </head>
 <body>
 
-<!-- Navbar -->
+<!-- Page Load Spinner Overlay -->
+<div class="spinner-overlay" id="pageSpinner">
+    <div class="spinner"></div>
+</div>
+
+<!-- Navbar with mobile toggler -->
 <nav class="navbar navbar-expand-lg navbar-dark app-nav">
     <div class="container">
         <a class="navbar-brand fw-bold" href="/">
             <i class="fas fa-robot me-2"></i>Virtual Customer Success Manager
         </a>
-        <div class="navbar-nav ms-auto">
-            <a class="nav-link active" href="/"><i class="fas fa-home me-1"></i>Dashboard</a>
-            <a class="nav-link" href="/complaints"><i class="fas fa-exclamation-circle me-1"></i>Complaints</a>
-            <a class="nav-link" href="/events"><i class="fas fa-calendar me-1"></i>Events</a>
-            <a class="nav-link" href="/analytics"><i class="fas fa-chart-bar me-1"></i>Analytics</a>
+        
+        <!-- Mobile Toggler Button -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain" aria-controls="navMain" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <!-- Collapsible Navbar Links -->
+        <div class="collapse navbar-collapse" id="navMain">
+            <div class="navbar-nav ms-auto text-center">
+                <a class="nav-link active" href="/"><i class="fas fa-home me-1"></i>Dashboard</a>
+                <a class="nav-link" href="/complaints"><i class="fas fa-exclamation-circle me-1"></i>Complaints</a>
+                <a class="nav-link" href="/events"><i class="fas fa-calendar me-1"></i>Events</a>
+                <a class="nav-link" href="/analytics"><i class="fas fa-chart-bar me-1"></i>Analytics</a>
+            </div>
         </div>
     </div>
 </nav>
@@ -36,16 +51,18 @@
                 <i class="fas fa-microphone me-2"></i>Voice Assistant (Omnidim.io)
             </h5>
             <p class="text-muted small">Click the microphone or type a command. Try: "I have a noise complaint" or "Show upcoming events"</p>
-            <div class="input-group">
+            <div class="voice-input-group">
                 <input type="text" id="voiceInput" class="form-control" placeholder="Type or speak your command...">
-                <button class="btn btn-purple" id="micBtn" onclick="startVoice()">
-                    <span class="btn-spinner"></span>
-                    <span class="btn-text"><i class="fas fa-microphone" id="micIcon"></i></span>
-                </button>
-                <button class="btn btn-outline-purple" onclick="sendCommand()">
-                    <span class="btn-spinner"></span>
-                    <span class="btn-text"><i class="fas fa-paper-plane"></i> Send</span>
-                </button>
+                <div class="voice-buttons">
+                    <button class="btn btn-purple" id="micBtn" onclick="startVoice()">
+                        <span class="btn-spinner"></span>
+                        <span class="btn-text"><i class="fas fa-microphone" id="micIcon"></i></span>
+                    </button>
+                    <button class="btn btn-outline-purple" onclick="sendCommand()">
+                        <span class="btn-spinner"></span>
+                        <span class="btn-text"><i class="fas fa-paper-plane"></i> Send</span>
+                    </button>
+                </div>
             </div>
             <div id="voiceResponse" class="mt-3 d-none alert alert-info">
                 <i class="fas fa-robot me-2"></i><span id="responseText"></span>
@@ -53,49 +70,50 @@
         </div>
     </div>
 
-    <!-- Stats Cards -->
+    <!-- Stats Cards - 2 columns on mobile, 4 on desktop -->
     <div class="row g-3 mb-4">
-        <div class="col-md-3">
-            <div class="card stat-card border-0 shadow-sm text-center">
+        <div class="col-6 col-md-3">
+            <div class="card stat-card border-0 shadow-sm text-center h-100">
                 <div class="card-body">
                     <div class="stat-icon bg-danger-soft mb-2"><i class="fas fa-exclamation-triangle text-danger"></i></div>
                     <h3 class="fw-bold text-danger" th:text="${complaintStats.open}">0</h3>
-                    <p class="text-muted mb-0">Open Complaints</p>
+                    <p class="text-muted mb-0 small">Open Complaints</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card stat-card border-0 shadow-sm text-center">
+        <div class="col-6 col-md-3">
+            <div class="card stat-card border-0 shadow-sm text-center h-100">
                 <div class="card-body">
                     <div class="stat-icon bg-warning-soft mb-2"><i class="fas fa-spinner text-warning"></i></div>
                     <h3 class="fw-bold text-warning" th:text="${complaintStats.inProgress}">0</h3>
-                    <p class="text-muted mb-0">In Progress</p>
+                    <p class="text-muted mb-0 small">In Progress</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card stat-card border-0 shadow-sm text-center">
+        <div class="col-6 col-md-3">
+            <div class="card stat-card border-0 shadow-sm text-center h-100">
                 <div class="card-body">
                     <div class="stat-icon bg-success-soft mb-2"><i class="fas fa-check-circle text-success"></i></div>
                     <h3 class="fw-bold text-success" th:text="${complaintStats.resolved}">0</h3>
-                    <p class="text-muted mb-0">Resolved</p>
+                    <p class="text-muted mb-0 small">Resolved</p>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card stat-card border-0 shadow-sm text-center">
+        <div class="col-6 col-md-3">
+            <div class="card stat-card border-0 shadow-sm text-center h-100">
                 <div class="card-body">
                     <div class="stat-icon bg-primary-soft mb-2"><i class="fas fa-calendar-check text-primary"></i></div>
                     <h3 class="fw-bold text-primary" th:text="${activeEvents}">0</h3>
-                    <p class="text-muted mb-0">Active Events</p>
+                    <p class="text-muted mb-0 small">Active Events</p>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Recent Sections - Stack on mobile -->
     <div class="row g-3">
         <!-- Recent Complaints -->
-        <div class="col-md-6">
+        <div class="col-12 col-md-6">
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-white fw-bold">
                     <i class="fas fa-list me-2 text-purple"></i>Recent Complaints
@@ -106,13 +124,13 @@
                     </div>
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item" th:each="c : ${recentComplaints}">
-                            <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
                                 <div>
                                     <strong th:text="${c.residentName}">Name</strong>
                                     <span class="text-muted small ms-2" th:text="${c.category}">Cat</span>
                                     <p class="mb-0 text-muted small" th:text="${#strings.abbreviate(c.description, 60)}">Desc</p>
                                 </div>
-                                <span class="badge"
+                                <span class="badge align-self-start align-self-sm-center"
                                       th:classappend="${c.status.name() == 'OPEN' ? 'bg-danger' : (c.status.name() == 'IN_PROGRESS' ? 'bg-warning text-dark' : 'bg-success')}"
                                       th:text="${c.status}">Status</span>
                             </div>
@@ -126,7 +144,7 @@
         </div>
 
         <!-- Voice Command History -->
-        <div class="col-md-6">
+        <div class="col-12 col-md-6">
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-white fw-bold">
                     <i class="fas fa-history me-2 text-purple"></i>Recent Voice Commands
@@ -149,20 +167,20 @@
         </div>
     </div>
 
-    <!-- Quick File Complaint -->
+    <!-- Quick File Complaint - Responsive form -->
     <div class="card mt-4 shadow-sm">
         <div class="card-header bg-white fw-bold">
             <i class="fas fa-plus-circle me-2 text-purple"></i>Quick File Complaint
         </div>
         <div class="card-body">
-            <div class="row g-3">
-                <div class="col-md-3">
+            <div class="row g-2">
+                <div class="col-12 col-md-3">
                     <input type="text" id="qName" class="form-control" placeholder="Your Name *">
                 </div>
-                <div class="col-md-2">
+                <div class="col-6 col-md-2">
                     <input type="text" id="qApt" class="form-control" placeholder="Apt No.">
                 </div>
-                <div class="col-md-2">
+                <div class="col-6 col-md-2">
                     <select id="qCategory" class="form-select">
                         <option value="">Category</option>
                         <option>NOISE</option>
@@ -174,10 +192,10 @@
                         <option>OTHER</option>
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-12 col-md-3">
                     <input type="text" id="qDesc" class="form-control" placeholder="Describe the issue *">
                 </div>
-                <div class="col-md-2">
+                <div class="col-12 col-md-2">
                     <button class="btn btn-purple w-100" onclick="quickFileComplaint()">
                         <span class="btn-spinner"></span>
                         <span class="btn-text"><i class="fas fa-paper-plane me-1"></i>Submit</span>
@@ -199,5 +217,16 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/js/app.js"></script>
 <script src="/js/spinners.js"></script>
+<script>
+    // Hide spinner when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            const spinner = document.getElementById('pageSpinner');
+            if (spinner) {
+                spinner.classList.remove('active');
+            }
+        }, 300);
+    });
+</script>
 </body>
 </html>
