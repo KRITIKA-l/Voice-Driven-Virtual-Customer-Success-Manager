@@ -4,6 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Analytics - VCSM</title>
+    
+    <!-- Favicon & Meta Tags -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext x='50' y='50' font-size='80' text-anchor='middle' dy='.3em'%3E🎙️%3C/text%3E%3C/svg%3E">
+    <meta name="description" content="Voice-Driven Virtual Customer Success Manager - Analytics Dashboard">
+    <meta name="keywords" content="voice assistant, customer success, analytics, complaints, events">
+    <meta name="author" content="Bhakkti Gautam">
+    <meta name="theme-color" content="#8b5cf6">
+    <meta property="og:title" content="VCSM - Analytics Dashboard">
+    <meta property="og:description" content="Community analytics and insights">
+    <meta name="twitter:card" content="summary_large_image">
+    
+    <!-- CSS Dependencies -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="/css/style.css" rel="stylesheet">
@@ -11,10 +23,13 @@
     <link rel="stylesheet" href="/css/spinners.css">
     <link rel="stylesheet" href="/css/responsive.css">
     <link rel="stylesheet" href="/css/hover-effects.css">
+    <link rel="stylesheet" href="/css/toast-notifications.css">
     <link rel="stylesheet" href="/css/shortcuts.css">
     <link rel="stylesheet" href="/css/back-to-top.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="/css/typing-indicator.css">
+    <link rel="stylesheet" href="/css/confirm-dialogs.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -22,6 +37,8 @@
 <div class="spinner-overlay" id="pageSpinner">
     <div class="spinner"></div>
 </div>
+
+<!-- Back to Top Button (will be created by JS) -->
 
 <!-- Navbar with mobile toggler -->
 <nav class="navbar navbar-expand-lg navbar-dark app-nav">
@@ -51,32 +68,44 @@
     <!-- Stats Cards - Responsive grid -->
     <div class="row g-3 mb-4">
         <div class="col-6 col-md-3">
-            <div class="card text-center shadow-sm border-0">
+            <div class="card text-center shadow-sm border-0 stat-card">
                 <div class="card-body">
+                    <div class="stat-icon bg-purple-soft mb-2">
+                        <i class="fas fa-chart-line text-purple"></i>
+                    </div>
                     <h2 class="fw-bold text-purple" th:text="${complaintStats.total}">0</h2>
                     <p class="text-muted mb-0 small">Total Complaints</p>
                 </div>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="card text-center shadow-sm border-0">
+            <div class="card text-center shadow-sm border-0 stat-card">
                 <div class="card-body">
+                    <div class="stat-icon bg-success-soft mb-2">
+                        <i class="fas fa-check-circle text-success"></i>
+                    </div>
                     <h2 class="fw-bold text-success" th:text="${complaintStats.resolved}">0</h2>
                     <p class="text-muted mb-0 small">Resolved</p>
                 </div>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="card text-center shadow-sm border-0">
+            <div class="card text-center shadow-sm border-0 stat-card">
                 <div class="card-body">
+                    <div class="stat-icon bg-info-soft mb-2">
+                        <i class="fas fa-calendar-alt text-info"></i>
+                    </div>
                     <h2 class="fw-bold text-info" th:text="${totalEvents}">0</h2>
                     <p class="text-muted mb-0 small">Total Events</p>
                 </div>
             </div>
         </div>
         <div class="col-6 col-md-3">
-            <div class="card text-center shadow-sm border-0">
+            <div class="card text-center shadow-sm border-0 stat-card">
                 <div class="card-body">
+                    <div class="stat-icon bg-warning-soft mb-2">
+                        <i class="fas fa-calendar-check text-warning"></i>
+                    </div>
                     <h2 class="fw-bold text-warning" th:text="${activeEvents}">0</h2>
                     <p class="text-muted mb-0 small">Active Events</p>
                 </div>
@@ -108,12 +137,22 @@
 <footer class="mt-5 py-3 text-center text-muted">
     <small>Voice-Driven Virtual Customer Success Manager &bull; Built with Spring Boot &amp; Omnidim.io</small>
 </footer>
-<script src="/js/shortcuts.js"></script>
-<script src="/js/back-to-top.js"></script>
-<script src="/js/typing-indicator.js"></script>
+
+<!-- JavaScript Dependencies -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/js/spinners.js"></script>
+<script src="/js/shortcuts.js"></script>
+<script src="/js/back-to-top.js"></script>
+<script src="/js/toast-notifications.js"></script>
+<script src="/js/typing-indicator.js"></script>
+<script src="/js/confirm-dialogs.js"></script>
+
 <script th:inline="javascript">
+    // Initialize toast for notifications
+    if (typeof toast !== 'undefined') {
+        window.toast = toast;
+    }
+    
     // Hide spinner when page loads
     document.addEventListener('DOMContentLoaded', function() {
         setTimeout(function() {
@@ -122,6 +161,13 @@
                 spinner.classList.remove('active');
             }
         }, 500);
+        
+        // Show welcome toast
+        setTimeout(function() {
+            if (typeof toast !== 'undefined') {
+                toast.info('Welcome to Analytics Dashboard!', '📊 Analytics');
+            }
+        }, 1000);
     });
 
     const stats = {
@@ -147,7 +193,9 @@
             labels: ['Open', 'In Progress', 'Resolved', 'Closed'],
             datasets: [{
                 data: [stats.open, stats.inProgress, stats.resolved, stats.closed],
-                backgroundColor: ['#dc3545', '#ffc107', '#28a745', '#6c757d']
+                backgroundColor: ['#dc3545', '#ffc107', '#28a745', '#6c757d'],
+                borderWidth: 0,
+                hoverOffset: 10
             }]
         },
         options: {
@@ -157,7 +205,22 @@
                 legend: {
                     position: 'bottom',
                     labels: { font: { size: 12 } }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
                 }
+            },
+            animation: {
+                animateScale: true,
+                animateRotate: true
             }
         }
     });
@@ -178,15 +241,37 @@
                     datasets: [{
                         label: 'Complaints',
                         data: Object.values(cats),
-                        backgroundColor: '#8b5cf6'
+                        backgroundColor: '#8b5cf6',
+                        borderRadius: 8,
+                        hoverBackgroundColor: '#7c3aed'
                     }]
                 },
                 options: { 
                     responsive: true,
                     maintainAspectRatio: true,
-                    plugins: { legend: { display: false } },
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Complaints: ${context.raw}`;
+                                }
+                            }
+                        }
+                    },
                     scales: {
-                        x: { ticks: { font: { size: 10 }, rotation: 45 } }
+                        x: { 
+                            ticks: { font: { size: 10 }, rotation: 45 },
+                            grid: { display: false }
+                        },
+                        y: { 
+                            ticks: { stepSize: 1 },
+                            grid: { color: '#e5e7eb' }
+                        }
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
                     }
                 }
             });
@@ -195,6 +280,11 @@
             if (window.spinnerManager) {
                 window.spinnerManager.hideOverlay();
             }
+            
+            // Show success toast
+            if (typeof toast !== 'undefined') {
+                toast.success('Analytics data loaded successfully!', '📈 Data Ready');
+            }
         })
         .catch(error => {
             console.error('Error loading analytics:', error);
@@ -202,6 +292,9 @@
                 '<div class="alert alert-danger">Failed to load category data. Please refresh.</div>';
             if (window.spinnerManager) {
                 window.spinnerManager.hideOverlay();
+            }
+            if (typeof toast !== 'undefined') {
+                toast.error('Failed to load analytics data', 'Error');
             }
         });
 </script>
