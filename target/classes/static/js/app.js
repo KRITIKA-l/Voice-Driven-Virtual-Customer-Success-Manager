@@ -1,6 +1,7 @@
 // ===== VOICE ASSISTANT =====
 let recognition = null;
 let isRecording = false;
+let lastCommandId = null; // Store last command ID for feedback
 
 function startVoice() {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -59,6 +60,11 @@ async function sendCommand() {
     const transcript = input.value.trim();
     if (!transcript) return;
 
+    // Show typing indicator if available
+    if (typeof typingIndicator !== 'undefined') {
+        typingIndicator.showProcessing();
+    }
+
     try {
         const res = await fetch('/api/voice/command', {
             method: 'POST',
@@ -66,14 +72,86 @@ async function sendCommand() {
             body: JSON.stringify({ transcript })
         });
         const data = await res.json();
+        
         const responseDiv = document.getElementById('voiceResponse');
         const responseText = document.getElementById('responseText');
-        responseText.textContent = data.response;
+        responseText.textContent = data.response || 'Command processed successfully!';
         responseDiv.classList.remove('d-none');
+        
+        // Store command ID for feedback
+        if (data.id) {
+            lastCommandId = data.id;
+        }
+
+        // Show feedback buttons
+        const feedbackDiv = document.getElementById('feedbackButtons');
+        if (feedbackDiv) {
+            feedbackDiv.style.display = 'block';
+            feedbackDiv.innerHTML = `
+                <span class="text-muted small me-2">Was this helpful?</span>
+                <button class="btn btn-sm btn-success" onclick="submitFeedback('UP')">
+                    <i class="fas fa-thumbs-up"></i> Yes
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="submitFeedback('DOWN')">
+                    <i class="fas fa-thumbs-down"></i> No
+                </button>
+            `;
+        }
+
+        // Hide typing indicator
+        if (typeof typingIndicator !== 'undefined') {
+            typingIndicator.hide();
+        }
+
         input.value = '';
+
     } catch (err) {
         console.error('Error sending command:', err);
+        if (typeof typingIndicator !== 'undefined') {
+            typingIndicator.hide();
+        }
+        if (typeof toast !== 'undefined') {
+            toast.error('Error processing command', 'Error');
+        }
     }
+}
+
+// Submit feedback for voice command
+function submitFeedback(type) {
+    if (!lastCommandId) {
+        if (typeof toast !== 'undefined') {
+            toast.error('No command to rate. Try a voice command first.', 'Error');
+        }
+        return;
+    }
+
+    const userId = localStorage.getItem('userId') || 1;
+
+    fetch(`/api/voice/feedback?commandId=${lastCommandId}&userId=${userId}&feedback=${type}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (typeof toast !== 'undefined') {
+                toast.success('Thank you for your feedback!', 'Feedback');
+            }
+            const feedbackDiv = document.getElementById('feedbackButtons');
+            if (feedbackDiv) {
+                feedbackDiv.innerHTML = '<span class="text-muted">✅ Feedback submitted</span>';
+            }
+        } else {
+            if (typeof toast !== 'undefined') {
+                toast.error('Error submitting feedback', 'Error');
+            }
+        }
+    })
+    .catch(err => {
+        if (typeof toast !== 'undefined') {
+            toast.error('Network error. Please try again.', 'Error');
+        }
+    });
 }
 
 // Allow Enter key to send command
@@ -99,7 +177,6 @@ function withAuthHeaders(headers = {}) {
 
 async function quickFileComplaint() {
     const name = document.getElementById('qName')?.value?.trim();
-
     const apt = document.getElementById('qApt')?.value?.trim();
     const category = document.getElementById('qCategory')?.value;
     const desc = document.getElementById('qDesc')?.value?.trim();
