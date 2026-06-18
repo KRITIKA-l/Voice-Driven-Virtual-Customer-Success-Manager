@@ -166,14 +166,14 @@
 <div class="container mt-4">
     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2 mb-3">
         <h4 class="fw-bold mb-0"><i class="fas fa-exclamation-circle text-purple me-2"></i>Complaint Management</h4>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 flex-wrap">
             <button class="btn btn-success btn-sm" onclick="exportCSV()">
                 <i class="fas fa-file-csv me-1"></i> CSV
             </button>
             <button class="btn btn-danger btn-sm" onclick="exportPDF()">
                 <i class="fas fa-file-pdf me-1"></i> PDF
             </button>
-            <button class="btn btn-purple w-100 w-sm-auto" data-bs-toggle="modal" data-bs-target="#fileComplaintModal">
+            <button class="btn btn-purple" data-bs-toggle="modal" data-bs-target="#fileComplaintModal">
                 <span class="btn-spinner"></span>
                 <span class="btn-text"><i class="fas fa-plus me-1"></i>New Complaint</span>
             </button>
@@ -308,6 +308,41 @@ n
                 </tbody>
             </table>
         </div>
+        
+        <!-- Pagination -->
+        <div th:unless="${complaints.empty}" class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 p-3 border-top">
+            <div>
+                <span class="text-muted small">
+                    Showing <span th:text="${page.number * page.size + 1}">1</span> 
+                    to <span th:text="${page.number * page.size + page.numberOfElements}">10</span> 
+                    of <span th:text="${page.totalElements}">0</span> complaints
+                </span>
+            </div>
+            <div class="d-flex flex-column flex-sm-row align-items-center gap-2">
+                <nav>
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item" th:classappend="${page.first} ? 'disabled' : ''">
+                            <a class="page-link" th:href="@{/complaints(page=${page.number - 1}, size=${page.size})}">Previous</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}" 
+                            th:classappend="${i == page.number} ? 'active' : ''">
+                            <a class="page-link" th:href="@{/complaints(page=${i}, size=${page.size})}" th:text="${i + 1}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${page.last} ? 'disabled' : ''">
+                            <a class="page-link" th:href="@{/complaints(page=${page.number + 1}, size=${page.size})}">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+                <div>
+                    <select class="form-select form-select-sm" onchange="changePageSize(this.value)">
+                        <option value="5" th:selected="${page.size == 5}">5</option>
+                        <option value="10" th:selected="${page.size == 10}">10</option>
+                        <option value="25" th:selected="${page.size == 25}">25</option>
+                        <option value="50" th:selected="${page.size == 50}">50</option>
+                    </select>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -407,6 +442,15 @@ n
             }
         }, 1000);
     });
+
+
+    // Change page size
+    function changePageSize(size) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('size', size);
+        url.searchParams.set('page', 0);
+        window.location.href = url.toString();
+    }
 
 
     // Export Functions

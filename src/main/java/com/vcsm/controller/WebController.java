@@ -1,14 +1,17 @@
 package com.vcsm.controller;
 
+import com.vcsm.model.Complaint;
 import com.vcsm.service.ComplaintService;
 import com.vcsm.service.EventService;
 import com.vcsm.service.OmnidimService;
 import com.vcsm.service.InteractionService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,6 +37,22 @@ public class WebController {
     public String landing() {
         return "landing";
     }
+
+    @GetMapping("/complaints")
+public String complaintsPage(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        Model model) {
+    
+    Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+    Page<Complaint> complaintPage = complaintService.getPaginatedComplaints(pageable);
+    
+    model.addAttribute("complaints", complaintPage.getContent());
+    model.addAttribute("page", complaintPage);
+    model.addAttribute("stats", complaintService.getComplaintStats());
+    
+    return "complaints";
+}
 
     @GetMapping("/")
     public String dashboard(Model model) {

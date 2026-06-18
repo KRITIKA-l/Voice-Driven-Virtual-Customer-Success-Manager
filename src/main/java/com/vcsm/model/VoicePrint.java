@@ -22,15 +22,11 @@ public class VoicePrint {
     @Column(name = "sample_duration")
     private double sampleDuration;
 
-    @Column(name = "language")
-    private String language;
-
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     public VoicePrint() {
         this.createdAt = LocalDateTime.now();
-        this.language = "en";
     }
 
     public VoicePrint(User user, String voiceFeatures, double sampleDuration) {
@@ -38,15 +34,6 @@ public class VoicePrint {
         this.voiceFeatures = voiceFeatures;
         this.sampleDuration = sampleDuration;
         this.createdAt = LocalDateTime.now();
-        this.language = "en";
-    }
-
-    public VoicePrint(User user, String voiceFeatures, double sampleDuration, String language) {
-        this.user = user;
-        this.voiceFeatures = voiceFeatures;
-        this.sampleDuration = sampleDuration;
-        this.createdAt = LocalDateTime.now();
-        this.language = language != null && !language.isBlank() ? language : "en";
     }
 
     // Getters and Setters
@@ -61,9 +48,6 @@ public class VoicePrint {
 
     public double getSampleDuration() { return sampleDuration; }
     public void setSampleDuration(double sampleDuration) { this.sampleDuration = sampleDuration; }
-
-    public String getLanguage() { return language; }
-    public void setLanguage(String language) { this.language = language; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
