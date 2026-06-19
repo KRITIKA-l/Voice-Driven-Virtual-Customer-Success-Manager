@@ -3,6 +3,7 @@ package com.vcsm.service;
 import com.vcsm.model.SentimentAnalysis;
 import com.vcsm.model.User;
 import com.vcsm.repository.SentimentAnalysisRepository;
+import com.vcsm.repository.UserRepository;
 import com.vcsm.utils.SentimentClassifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,9 @@ class SentimentAnalysisServiceTest {
     @Mock
     private SentimentAnalysisRepository sentimentRepository;
 
+    @Mock
+    private UserRepository userRepository;
+
     @InjectMocks
     private SentimentAnalysisService sentimentService;
 
@@ -40,6 +44,12 @@ class SentimentAnalysisServiceTest {
 
         positiveResult = new SentimentClassifier.SentimentResult("POSITIVE", 0.85);
         negativeResult = new SentimentClassifier.SentimentResult("NEGATIVE", 0.75);
+
+        // Stub shouldEscalate calls on mocked classifier
+        lenient().when(sentimentClassifier.shouldEscalate("NEGATIVE")).thenReturn(true);
+        lenient().when(sentimentClassifier.shouldEscalate("VERY_NEGATIVE")).thenReturn(true);
+        lenient().when(sentimentClassifier.shouldEscalate("POSITIVE")).thenReturn(false);
+        lenient().when(sentimentClassifier.shouldEscalate("NEUTRAL")).thenReturn(false);
     }
 
     @Test
@@ -86,6 +96,7 @@ class SentimentAnalysisServiceTest {
     @Test
     void testAnalyzeAndProcess_SavesSentiment() {
         String text = "I am happy";
+        when(userRepository.findById(testUser.getId())).thenReturn(java.util.Optional.of(testUser));
         when(sentimentClassifier.analyze(text)).thenReturn(positiveResult);
         when(sentimentRepository.save(any(SentimentAnalysis.class))).thenAnswer(invocation -> invocation.getArgument(0));
 

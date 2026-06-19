@@ -26,4 +26,5 @@ public interface EventWaitlistRepository extends JpaRepository<EventWaitlist, Lo
     Optional<EventWaitlist> findFirstByEventAndConfirmedFalseOrderByJoinedAtAsc(Event event);
     
     void deleteByEventAndUser(Event event, User user);
+    void deleteByEvent(Event event);
 }

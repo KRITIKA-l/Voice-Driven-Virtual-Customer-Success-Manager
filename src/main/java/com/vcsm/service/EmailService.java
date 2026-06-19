@@ -1,9 +1,11 @@
 package com.vcsm.service;
 
 import com.vcsm.model.EmailLog;
+import com.vcsm.model.EmailQueue;
 import com.vcsm.model.Event;
 import com.vcsm.model.User;
 import com.vcsm.repository.EmailLogRepository;
+import com.vcsm.repository.EmailQueueRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -22,6 +24,9 @@ public class EmailService {
     
     @Autowired
     private EmailLogRepository emailLogRepository;
+
+    @Autowired
+    private EmailQueueRepository emailQueueRepository;
     
     @Value("${spring.mail.username}")
     private String fromEmail;
@@ -30,33 +35,10 @@ public class EmailService {
         String subject = getSubject(reminderType, event.getName());
         String message = buildReminderMessage(event, user, reminderType);
         
-        try {
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-            
-            helper.setFrom(fromEmail);
-            helper.setTo(user.getEmail());
-            helper.setSubject(subject);
-            helper.setText(message, true);
-            
-            mailSender.send(mimeMessage);
-            
-            // Log success
-            EmailLog log = new EmailLog(user, event, user.getEmail(), subject, message);
-            log.setStatus("SENT");
-            emailLogRepository.save(log);
-            
-            System.out.println("✅ Reminder sent to: " + user.getEmail() + " for event: " + event.getName());
-            
-        } catch (Exception e) {
-            // Log failure
-            EmailLog log = new EmailLog(user, event, user.getEmail(), subject, message);
-            log.setStatus("FAILED");
-            log.setErrorMessage(e.getMessage());
-            emailLogRepository.save(log);
-            
-            System.err.println("❌ Failed to send email: " + e.getMessage());
-        }
+        EmailQueue queueItem = new EmailQueue(user, event, user.getEmail(), subject, message);
+        emailQueueRepository.save(queueItem);
+        
+        System.out.println("📨 Queued email reminder to: " + user.getEmail() + " for event: " + event.getName());
     }
     
     /**
@@ -66,32 +48,60 @@ public class EmailService {
         String subject = "🎉 Slot Available for " + event.getName() + "!";
         String message = buildSlotAvailableMessage(event, user);
         
+        EmailQueue queueItem = new EmailQueue(user, event, user.getEmail(), subject, message);
+        emailQueueRepository.save(queueItem);
+        
+        System.out.println("📨 Queued slot available email to: " + user.getEmail());
+    }
+
+    /**
+     * Process an email from the queue, managing retries with exponential backoff
+     */
+    public void processQueuedEmail(EmailQueue email) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
             
             helper.setFrom(fromEmail);
-            helper.setTo(user.getEmail());
-            helper.setSubject(subject);
-            helper.setText(message, true);
+            helper.setTo(email.getRecipientEmail());
+            helper.setSubject(email.getSubject());
+            helper.setText(email.getMessage(), true);
             
             mailSender.send(mimeMessage);
             
-            // Log success
-            EmailLog log = new EmailLog(user, event, user.getEmail(), subject, message);
+            // Log success in audit trail (EmailLog)
+            EmailLog log = new EmailLog(email.getUser(), email.getEvent(), email.getRecipientEmail(), email.getSubject(), email.getMessage());
             log.setStatus("SENT");
             emailLogRepository.save(log);
             
-            System.out.println("✅ Slot notification sent to: " + user.getEmail());
+            // Update queue item status
+            email.setStatus("SENT");
+            emailQueueRepository.save(email);
+            
+            System.out.println("✅ Sent queued email to: " + email.getRecipientEmail());
             
         } catch (Exception e) {
-            // Log failure
-            EmailLog log = new EmailLog(user, event, user.getEmail(), subject, message);
+            // Log failure in audit trail (EmailLog)
+            EmailLog log = new EmailLog(email.getUser(), email.getEvent(), email.getRecipientEmail(), email.getSubject(), email.getMessage());
             log.setStatus("FAILED");
             log.setErrorMessage(e.getMessage());
             emailLogRepository.save(log);
             
-            System.err.println("❌ Failed to send slot notification: " + e.getMessage());
+            // Update queue item attempts and retry state
+            int attempts = email.getAttempts() + 1;
+            email.setAttempts(attempts);
+            email.setErrorMessage(e.getMessage());
+            
+            if (attempts >= 5) {
+                email.setStatus("FAILED");
+                System.err.println("❌ Permanently failed to send queued email to " + email.getRecipientEmail() + ": " + e.getMessage());
+            } else {
+                // Exponential backoff retry delay in minutes: 2^attempts (e.g. 2, 4, 8, 16 mins)
+                long backoffMinutes = (long) Math.pow(2, attempts);
+                email.setNextAttemptAt(LocalDateTime.now().plusMinutes(backoffMinutes));
+                System.out.println("⏳ Failed email to " + email.getRecipientEmail() + ". Scheduling retry in " + backoffMinutes + " mins. Attempt: " + attempts);
+            }
+            emailQueueRepository.save(email);
         }
     }
     

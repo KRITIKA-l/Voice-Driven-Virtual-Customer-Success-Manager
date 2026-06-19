@@ -17,7 +17,7 @@ class SentimentClassifierTest {
 
     @Test
     void testPositiveSentiment() {
-        SentimentClassifier.SentimentResult result = classifier.analyze("This is great and awesome!");
+        SentimentClassifier.SentimentResult result = classifier.analyze("This is great!");
         
         assertEquals("POSITIVE", result.getSentiment());
         assertTrue(result.getConfidence() > 0.5);

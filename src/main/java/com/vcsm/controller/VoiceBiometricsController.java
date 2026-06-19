@@ -39,7 +39,7 @@ public class VoiceBiometricsController {
         
         double duration = 3.0;
         VoiceVerificationResponse response = voiceBiometricsService.enrollVoice(
-            userId, request.getVoiceSample(), duration);
+            userId, request.getVoiceSample(), duration, request.getLanguage(), request.getText());
         
         if (response.isVerified()) {
             return ResponseEntity.ok(response);
@@ -63,7 +63,7 @@ public class VoiceBiometricsController {
         }
         
         VoiceVerificationResponse response = voiceBiometricsService.verifyVoice(
-            request.getUserId(), request.getVoiceSample());
+            request.getUserId(), request.getVoiceSample(), request.getText());
         
         if (response.isVerified()) {
             return ResponseEntity.ok(response);
