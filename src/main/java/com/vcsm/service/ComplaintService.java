@@ -24,6 +24,12 @@ public class ComplaintService {
     private ComplaintRepository complaintRepository;
 
     @Autowired
+
+   private AuditLogService auditLogService;
+
+     @Autowired
+     private NotificationService notificationService;
+
     private PriorityClassifierService priorityClassifierService;
 
     @Autowired
@@ -34,6 +40,7 @@ public class ComplaintService {
 
     @Autowired
     private NotificationService notificationService;
+
 
 
     private boolean isAdmin() {
