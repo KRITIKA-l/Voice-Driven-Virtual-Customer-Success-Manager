@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -61,6 +62,32 @@ public class ComplaintController {
         
         Pageable pageable = PageRequest.of(page, size, sort);
         Page<Complaint> complaints = complaintService.getPaginatedComplaints(pageable);
+        
+        return ResponseEntity.ok(complaints);
+    }
+
+    // ===== SEARCH ENDPOINT =====
+    @Operation(summary = "Search complaints with filters")
+    @GetMapping("/search")
+    public ResponseEntity<Page<Complaint>> searchComplaints(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String priority,
+            @RequestParam(required = false) LocalDateTime startDate,
+            @RequestParam(required = false) LocalDateTime endDate,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction) {
+        
+        Sort sort = direction.equalsIgnoreCase("asc") ? 
+            Sort.by(sortBy).ascending() : 
+            Sort.by(sortBy).descending();
+        
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<Complaint> complaints = complaintService.searchComplaints(
+            keyword, status, category, priority, startDate, endDate, pageable);
         
         return ResponseEntity.ok(complaints);
     }
@@ -128,35 +155,10 @@ public class ComplaintController {
         return ResponseEntity.ok(complaintService.getComplaintsByCategory());
     }
 
-
-    @Operation(summary = "Get priority statistics")
-    @GetMapping("/stats/priority")
-    public ResponseEntity<Map<String, Long>> getPriorityStats() {
-        Map<String, Long> stats = complaintService.getPriorityStats();
-        return ResponseEntity.ok(stats);
-
-    @Operation(summary = "Get complaints by priority")
-    @GetMapping("/priority/{priority}")
-    public ResponseEntity<List<Complaint>> getByPriority(@PathVariable String priority) {
-        return ResponseEntity.ok(
-                complaintService.getComplaintsByPriority(priority.toUpperCase())
-        );
-    }
-
-    @Operation(summary = "Update complaint priority manually")
-    @PutMapping("/{id}/priority")
-    public ResponseEntity<Complaint> updatePriority(  @PathVariable Long id,
-            @RequestParam String priority) {
-        return ResponseEntity.ok(
-                complaintService.updatePriority(id, priority.toUpperCase())
-        );
-    }
-
     @Operation(summary = "Get priority statistics")
     @GetMapping("/stats/priority")
     public ResponseEntity<Map<String, Long>> getPriorityStats() {
         return ResponseEntity.ok(complaintService.getPriorityStats());
-
     }
 
     @ExceptionHandler(IllegalStateException.class)

@@ -114,7 +114,48 @@ async function sendCommand() {
             toast.error('Error processing command', 'Error');
         }
 
+
     }
+}
+
+// Submit feedback for voice command
+function submitFeedback(type) {
+    if (!lastCommandId) {
+        if (typeof toast !== 'undefined') {
+            toast.error('No command to rate. Try a voice command first.', 'Error');
+        }
+        return;
+
+
+    }
+
+    const userId = localStorage.getItem('userId') || 1;
+
+    fetch(`/api/voice/feedback?commandId=${lastCommandId}&userId=${userId}&feedback=${type}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (typeof toast !== 'undefined') {
+                toast.success('Thank you for your feedback!', 'Feedback');
+            }
+            const feedbackDiv = document.getElementById('feedbackButtons');
+            if (feedbackDiv) {
+                feedbackDiv.innerHTML = '<span class="text-muted">✅ Feedback submitted</span>';
+            }
+        } else {
+            if (typeof toast !== 'undefined') {
+                toast.error('Error submitting feedback', 'Error');
+            }
+        }
+    })
+    .catch(err => {
+        if (typeof toast !== 'undefined') {
+            toast.error('Network error. Please try again.', 'Error');
+        }
+    });
 }
 
 // Submit feedback for voice command
@@ -338,7 +379,10 @@ async function registerEvent(id) {
         console.error('Error registering:', err);
     }
 
+
+
 }
+
 }
 
 // ===== BULK OPERATIONS =====
@@ -460,6 +504,11 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.complaint-checkbox').forEach(cb => {
         cb.addEventListener('change', updateSelectedCount);
     });
+
+
+});
+
+
 });
 
 // ===== WEBSOCKET NOTIFICATIONS =====
@@ -622,5 +671,11 @@ document.addEventListener('DOMContentLoaded', function() {
         connectWebSocket();
         updateNotificationCount();
     }, 500);
+
+
 });
+
+
+});
+
 

@@ -4,9 +4,11 @@ import com.vcsm.model.Complaint;
 import com.vcsm.model.User;
 import com.vcsm.repository.ComplaintRepository;
 import com.vcsm.repository.UserRepository;
+import com.vcsm.specification.ComplaintSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -39,7 +41,15 @@ public class ComplaintService {
     private UserRepository userRepository;
 
     @Autowired
+
     private BlockchainService blockchainService;
+
+
+    private AuditLogService auditLogService;
+
+    private NotificationService notificationService;
+
+
 
     private boolean isAdmin() {
         var auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
@@ -117,12 +127,14 @@ public class ComplaintService {
             log.warning("Failed to send notification: " + e.getMessage());
         }
 
+
         // Add to blockchain
         try {
             blockchainService.addBlock(saved, "COMPLAINT_CREATED");
         } catch (Exception e) {
             log.warning("Failed to add block to blockchain: " + e.getMessage());
         }
+
 
         return saved;
     }
@@ -135,12 +147,34 @@ public class ComplaintService {
         return complaintRepository.findByResidentUsernameOrderByCreatedAtDesc(username);
     }
 
+
+    // Pagination method
+
     public Page<Complaint> getPaginatedComplaints(Pageable pageable) {
         if (isAdmin()) {
             return complaintRepository.findAll(pageable);
         }
         String username = currentUsername();
         return complaintRepository.findByResidentUsername(username, pageable);
+    }
+
+    // ===== SEARCH METHOD =====
+    public Page<Complaint> searchComplaints(String keyword, String status, String category, 
+                                            String priority, LocalDateTime startDate, 
+                                            LocalDateTime endDate, Pageable pageable) {
+        Specification<Complaint> spec = Specification
+            .where(ComplaintSpecification.hasKeyword(keyword))
+            .and(ComplaintSpecification.hasStatus(status))
+            .and(ComplaintSpecification.hasCategory(category))
+            .and(ComplaintSpecification.hasPriority(priority))
+            .and(ComplaintSpecification.createdBetween(startDate, endDate));
+
+        if (!isAdmin()) {
+            String username = currentUsername();
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("residentUsername"), username));
+        }
+
+        return complaintRepository.findAll(spec, pageable);
     }
 
     public Optional<Complaint> getComplaintById(Long id) {
@@ -236,6 +270,7 @@ public class ComplaintService {
             log.warning("Failed to send notification: " + e.getMessage());
         }
 
+
         // Add to blockchain
         try {
             blockchainService.addBlock(updated, "STATUS_UPDATED");
@@ -284,6 +319,7 @@ public class ComplaintService {
                     newPriority
                 );
             }
+
         } catch (Exception e) {
             log.warning("Failed to log user activity: " + e.getMessage());
         }
@@ -293,6 +329,10 @@ public class ComplaintService {
             blockchainService.addBlock(updated, "PRIORITY_UPDATED");
         } catch (Exception e) {
             log.warning("Failed to add block to blockchain: " + e.getMessage());
+
+        } catch (Exception e) {
+            log.warning("Failed to log user activity: " + e.getMessage());
+
         }
 
         return updated;
@@ -302,6 +342,7 @@ public class ComplaintService {
         if (!isAdmin()) {
             throw new AccessDeniedException("Only admins can delete complaints");
         }
+e
 
         Complaint complaint = complaintRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Complaint not found: " + id));
@@ -312,6 +353,7 @@ public class ComplaintService {
         } catch (Exception e) {
             log.warning("Failed to add block to blockchain: " + e.getMessage());
         }
+
 
         // Log user activity
         try {
