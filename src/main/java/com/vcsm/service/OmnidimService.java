@@ -65,6 +65,9 @@ public class OmnidimService {
 
         // Log voice analytics
         try {
+
+            User user = userRepository.findById(1L).orElse(null); // Replace with actual user
+
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
             String email = auth != null ? auth.getName() : null;
             User user = null;
@@ -74,6 +77,7 @@ public class OmnidimService {
             if (user == null) {
                 user = userRepository.findById(1L).orElse(null); // Fallback to 1L
             }
+
             if (user != null) {
                 boolean success = !intent.equals("UNKNOWN");
                 voiceAnalyticsService.logCommand(user, transcript, intent, success, responseTime);
