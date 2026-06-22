@@ -213,6 +213,21 @@ public String complaintsPage(
         return "events";
     }
 
+    @GetMapping("/voice-cloning")
+    public String voiceCloning() {
+       return "voice-cloning-ui";
+    }
+
+    @GetMapping("/live-dashboard")
+public String liveDashboard() {
+    return "live-dashboard";
+}
+
+@GetMapping("/translation")
+public String translation() {
+    return "translation-ui";
+}
+
     @GetMapping("/analytics")
     public String analytics(Model model) {
 
@@ -240,6 +255,23 @@ public String complaintsPage(
     }
 
 
+    
+    @GetMapping("/blockchain-verify")
+public String blockchainVerify() {
+    return "blockchain-verify";
+}
+
+@GetMapping("/offline")
+public String offline() {
+    return "offline";
+}
+
+@GetMapping("/twilio-demo")
+public String twilioDemo() {
+    return "twilio-demo";
+}
+
+
 
     @GetMapping("/voice-analytics")
     public String voiceAnalytics() {
@@ -255,6 +287,7 @@ public String complaintsPage(
 public String auditLogs() {
     return "audit-logs";
 }
+
 
 
     @GetMapping("/interaction-history")
