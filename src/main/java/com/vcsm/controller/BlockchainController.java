@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+import java.util.Optional;
+
+
 @RestController
 @RequestMapping("/api/blockchain")
 @CrossOrigin(origins = "*")
@@ -24,7 +27,11 @@ public class BlockchainController {
     @GetMapping("/verify/{id}")
     public ResponseEntity<Map<String, Object>> verifyComplaint(@PathVariable Long id) {
         Map<String, Object> result = blockchainService.verifyComplaint(id);
+
         if (!(boolean) result.get("success")) {
+
+        if (!Boolean.TRUE.equals(result.get("success"))) {
+
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(result);

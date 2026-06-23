@@ -223,6 +223,13 @@ public String liveDashboard() {
     return "live-dashboard";
 }
 
+
+@GetMapping("/translation")
+public String translation() {
+    return "translation-ui";
+}
+
+
     @GetMapping("/analytics")
     public String analytics(Model model) {
 
@@ -250,6 +257,23 @@ public String liveDashboard() {
     }
 
 
+    
+    @GetMapping("/blockchain-verify")
+public String blockchainVerify() {
+    return "blockchain-verify";
+}
+
+@GetMapping("/offline")
+public String offline() {
+    return "offline";
+}
+
+@GetMapping("/twilio-demo")
+public String twilioDemo() {
+    return "twilio-demo";
+}
+
+
 
     @GetMapping("/voice-analytics")
     public String voiceAnalytics() {
@@ -265,6 +289,7 @@ public String liveDashboard() {
 public String auditLogs() {
     return "audit-logs";
 }
+
 
 
     @GetMapping("/interaction-history")
