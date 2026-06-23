@@ -343,6 +343,7 @@ public class ComplaintService {
         if (!isAdmin()) {
             throw new AccessDeniedException("Only admins can delete complaints");
         }
+e
 
 
         Complaint complaint = complaintRepository.findById(id)
