@@ -103,9 +103,11 @@ public class ComplaintClassifier {
 
             TrainingParameters params = TrainingParameters.defaultParams();
             model = DocumentCategorizerME.train(
-                new CollectionObjectStream<>(samples),
-                params
-            );
+    "en",
+    new CollectionObjectStream<>(samples),
+    params,
+    new DoccatFactory()
+);
             categorizer = new DocumentCategorizerME(model);
 
             System.out.println("✅ Complaint classifier trained with " + samples.size() + " samples");
@@ -129,20 +131,22 @@ public class ComplaintClassifier {
     }
 
     public Map<String, Double> getAllScores(String text) {
-        if (categorizer == null || text == null || text.isEmpty()) {
-            return new HashMap<>();
-        }
+    Map<String, Double> scores = new LinkedHashMap<>();
 
-        String[] tokens = tokenizer.tokenize(text);
-        double[] outcomes = categorizer.categorize(tokens);
-        String[] categories = categorizer.getCategories();
-
-        Map<String, Double> scores = new LinkedHashMap<>();
-        for (int i = 0; i < categories.length; i++) {
-            scores.put(categories[i], outcomes[i]);
-        }
+    if (categorizer == null || text == null || text.isEmpty()) {
         return scores;
     }
+
+    String[] tokens = tokenizer.tokenize(text);
+    double[] outcomes = categorizer.categorize(tokens);
+
+    for (int i = 0; i < outcomes.length; i++) {
+        scores.put("CATEGORY_" + i, outcomes[i]);
+    }
+
+    return scores;
+}
+       
 
     public static class ClassificationResult {
         private final String category;
