@@ -13,8 +13,10 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.domain.Specification;
 
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
 @Repository
-public interface ComplaintRepository extends JpaRepository<Complaint, Long> {
+public interface ComplaintRepository extends JpaRepository<Complaint, Long>, JpaSpecificationExecutor<Complaint> {
 
     List<Complaint> findByStatus(Complaint.ComplaintStatus status);
 
