@@ -1,6 +1,7 @@
 package com.vcsm.service;
 
 import com.vcsm.model.Complaint;
+import com.vcsm.model.SmartContract;
 import com.vcsm.repository.ComplaintRepository;
 import com.vcsm.repository.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;

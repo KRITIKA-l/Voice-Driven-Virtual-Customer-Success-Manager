@@ -1,6 +1,7 @@
 package com.vcsm.controller;
 
 import com.vcsm.ai.CausalEngine;
+import com.vcsm.ai.CausalGraphBuilder;
 import com.vcsm.ai.CounterfactualSimulator;
 import com.vcsm.ai.RootCauseAnalyzer;
 import org.springframework.beans.factory.annotation.Autowired;
