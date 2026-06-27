@@ -71,16 +71,16 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(
-                        rateLimitingFilter,
-                        HmacAuthenticationFilter.class
-                )
-                .addFilterBefore(
                         jwtAuthFilter,
                         UsernamePasswordAuthenticationFilter.class
                 )
                 .addFilterBefore(
                         hmacAuthenticationFilter,
                         JwtAuthFilter.class
+                )
+                .addFilterBefore(
+                        rateLimitingFilter,
+                        HmacAuthenticationFilter.class
                 )
                 .httpBasic(Customizer.withDefaults());
 
